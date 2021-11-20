@@ -15,11 +15,9 @@ gmpV="6.2.1"
 
 #https://ftp.gnu.org/gnu/nettle/?C=M;O=D
 nettleV="3.7.3"
-#nettleV="3.7.1"
 
 #https://ftp.gnu.org/gnu/libtasn1/?C=M;O=D
-libtasn1V="4.17.0"
-#libtasn1V="4.16.0"
+libtasn1V="4.18.0"
 
 libidn2V="2.3.0"
 #libidn2V="2.3.1"
@@ -28,27 +26,33 @@ libidn2V="2.3.0"
 #https://ftp.gnu.org/gnu/libunistring/?C=M;O=D
 libunistringV="0.9.10"
 
-#https://www.gnupg.org/ftp/gcrypt/gnutls/v3.6/
-gnutlsV="3.6.16"
-gnutlsV1="3.6"
+#https://www.gnupg.org/ftp/gcrypt/gnutls/v3.7/
+gnutlsV="3.7.2"
+gnutlsV1="3.7"
 
 #https://c-ares.org/download/
 caresV="1.17.2"
+# 1.18.1 couldn't compile
+
 #https://ftp.gnu.org/gnu/libiconv/?C=M;O=D
 iconV="1.16"
+
 #https://github.com/rockdaboot/libpsl/releases
 pslV="0.21.1"
 
 #https://ftp.pcre.org/pub/pcre
-pcre2V="10.37"
+pcre2V="10.39"
+
 # https://www.gnupg.org/ftp/gcrypt/libgpg-error/
-gpgErrorV="1.42"
+gpgErrorV="1.43"
+
 # https://www.gnupg.org/ftp/gcrypt/libassuan/
 assuanV="2.5.5"
+
 # https://gnupg.org/ftp/gcrypt/gpgme/
 gpgmeV="1.16.0"
 
-#https://github.com/libexpat/libexpat/releases
+# https://github.com/libexpat/libexpat/releases
 expatV="2.4.1"
 
 # https://github.com/metalink-dev/libmetalink/releases
@@ -278,7 +282,8 @@ fi
 # build pcre2
 # -----------------------------------------------------------------------------
 if [ ! -f $INSTALL_PATH/lib/libpcre2-8.a ]; then
-	wget https://ftp.pcre.org/pub/pcre/pcre2-${pcre2V}.tar.gz
+	wget https://github.com/PhilipHazel/pcre2/releases/download/pcre2-${pcre2V}/pcre2-${pcre2V}.tar.gz
+	#wget https://ftp.pcre.org/pub/pcre/pcre2-${pcre2V}.tar.gz
 	tar -xf pcre2-${pcre2V}.tar.gz
 	cd pcre2-${pcre2V}
 	./configure \
