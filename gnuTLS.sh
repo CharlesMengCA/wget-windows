@@ -27,6 +27,10 @@ libidn2V="2.3.0"
 # https://ftp.gnu.org/gnu/libunistring/?C=M;O=D
 libunistringV="1.0"
 
+# https://www.gnupg.org/ftp/gcrypt/gnutls/v3.7/
+gnutlsV="3.7.2"
+gnutlsV1="3.7"
+
 # https://c-ares.org/download/
 caresV="1.17.2"
 # 1.18.1 couldn't compile
@@ -37,7 +41,7 @@ iconV="1.16"
 # https://github.com/rockdaboot/libpsl/releases
 pslV="0.21.1"
 
-# https://github.com/PhilipHazel/pcre2/releases
+# https://ftp.pcre.org/pub/pcre
 pcre2V="10.39"
 
 # https://www.gnupg.org/ftp/gcrypt/libgpg-error/
@@ -47,10 +51,10 @@ gpgErrorV="1.44"
 assuanV="2.5.5"
 
 # https://gnupg.org/ftp/gcrypt/gpgme/
-gpgmeV="1.17.1"
+gpgmeV="1.17.0"
 
 # https://github.com/libexpat/libexpat/releases
-expatV="2.4.7"
+expatV="2.4.6"
 
 # https://github.com/metalink-dev/libmetalink/releases
 metalinkV="0.1.3"
@@ -59,7 +63,7 @@ metalinkV="0.1.3"
 zlibV="1.2.11"
 
 # https://www.openssl.org/source/
-opensslV="1.1.1n"
+opensslV="1.1.1m"
 
 PATCH_PATH=$PWD
 
@@ -168,6 +172,43 @@ if [ ! -f $INSTALL_PATH/lib/libunistring.a ]; then
 	(($? != 0)) && { printf '%s\n' "[unistring] make failed"; exit 1; }
 	make install
 	(($? != 0)) && { printf '%s\n' "[unistring] make install"; exit 1; }
+	cd $BUILD_ROOT
+fi
+# -----------------------------------------------------------------------------
+# build gnutls
+# -----------------------------------------------------------------------------
+if [ ! -f $INSTALL_PATH/lib/libgnutls.a ]; then
+	wget https://www.gnupg.org/ftp/gcrypt/gnutls/v${gnutlsV1}/gnutls-${gnutlsV}.tar.xz
+	tar -xf gnutls-${gnutlsV}.tar.xz
+	cd gnutls-${gnutlsV}
+	PKG_CONFIG_PATH="$INSTALL_PATH/lib/pkgconfig" \
+	CFLAGS="-I$INSTALL_PATH/include" \
+	LDFLAGS="-L$INSTALL_PATH/lib" \
+	GMP_LIBS="-L$INSTALL_PATH/lib -lgmp" \
+	NETTLE_LIBS="-L$INSTALL_PATH/lib -lnettle -lgmp" \
+	HOGWEED_LIBS="-L$INSTALL_PATH/lib -lhogweed -lnettle -lgmp" \
+	LIBTASN1_LIBS="-L$INSTALL_PATH/lib -ltasn1" \
+	LIBIDN2_LIBS="-L$INSTALL_PATH/lib -lidn2" \
+	GMP_CFLAGS=$CFLAGS \
+	LIBTASN1_CFLAGS=$CFLAGS \
+	NETTLE_CFLAGS=$CFLAGS \
+	HOGWEED_CFLAGS=$CFLAGS \
+	LIBIDN2_CFLAGS=$CFLAGS \
+	./configure \
+	--host=x86_64-w64-mingw32 \
+	--prefix=$INSTALL_PATH \
+	--with-included-unistring \
+	--disable-openssl-compatibility \
+	--without-p11-kit \
+	--disable-tests \
+	--disable-doc \
+	--disable-shared \
+	--enable-static
+	(($? != 0)) && { printf '%s\n' "[gnutls] configure failed"; exit 1; }
+	make
+	(($? != 0)) && { printf '%s\n' "[gnutls] make failed"; exit 1; }
+	make install
+	(($? != 0)) && { printf '%s\n' "[gnutls] make install"; exit 1; }
 	cd $BUILD_ROOT
 fi
 # -----------------------------------------------------------------------------
@@ -385,29 +426,6 @@ if [ ! -f $INSTALL_PATH/lib/libz.a ]; then
 	(($? != 0)) && { printf '%s\n' "[zlib] make install"; exit 1; }
 	cd $BUILD_ROOT
 fi
-# -----------------------------------------------------------------------------
-# build openssl
-# -----------------------------------------------------------------------------
-if [ ! -f $INSTALL_PATH/lib/libssl.a ]; then
-	wget https://www.openssl.org/source/openssl-${opensslV}.tar.gz
-	tar -xf openssl-${opensslV}.tar.gz
-	cd openssl-${opensslV}
-	./Configure \
-		--static \
-		-static \
-		--prefix=$INSTALL_PATH \
-		--cross-compile-prefix=x86_64-w64-mingw32- \
-		mingw64 \
-		no-shared \
-		enable-asm \
-		no-tests \
-		--with-zlib-include=$INSTALL_PATH \
-		--with-zlib-lib=$INSTALL_PATH/lib/libz.a
-	make
-	make install_sw
-	cd $BUILD_ROOT
-fi
-cp /usr/x86_64-w64-mingw32/lib/libbcrypt.a $INSTALL_PATH/lib/
 
 wget https://ftp.gnu.org/gnu/wget/wget-${wgetV}.tar.gz
 tar -xf wget-${wgetV}.tar.gz
@@ -419,45 +437,41 @@ pwd
 #patch -p1 < $PATCH_PATH/taskbar-progress.patch
 
 # -----------------------------------------------------------------------------
-# build wget (openssl)
+# build wget (gnuTLS)
 # -----------------------------------------------------------------------------
 
-make clean
-patch src/openssl.c < $PATCH_PATH/windows-openssl.diff
-
-CFLAGS="-I$INSTALL_PATH/include -DCARES_STATICLIB=1 -DPCRE2_STATIC=1 -DNDEBUG -O3 -march=x86-64 -mtune=generic" \
- LDFLAGS="-L$INSTALL_PATH/lib -static -static-libgcc -s" \
- OPENSSL_CFLAGS=$CFLAGS \
- OPENSSL_LIBS="-L$INSTALL_PATH/lib -lcrypto -lssl" \
- LIBPSL_CFLAGS=$CFLAGS \
- LIBPSL_LIBS="-L$INSTALL_PATH/lib -lpsl" \
- CARES_CFLAGS=$CFLAGS \
- CARES_LIBS="-L$INSTALL_PATH/lib -lcares" \
- PCRE2_CFLAGS=$CFLAGS \
- PCRE2_LIBS="-L$INSTALL_PATH/lib -lpcre2-8"  \
- METALINK_CFLAGS="-I$INSTALL_PATH/include" \
- METALINK_LIBS="-L$INSTALL_PATH/lib -lmetalink -lexpat" \
- LIBS="-L$INSTALL_PATH/lib -lidn2 -lpsl -lcares -lunistring -liconv -lpcre2-8 -lmetalink -lexpat -lgpgme -lassuan -lgpg-error -lcrypto -lssl -lz -lcrypt32" \
- ./configure \
- --host=x86_64-w64-mingw32 \
- --prefix=$INSTALL_PATH \
- --disable-debug \
- --disable-valgrind-tests \
- --enable-iri \
- --enable-pcre2 \
- --with-ssl=openssl \
- --with-included-libunistring \
- --with-libidn \
- --with-cares \
- --with-libpsl \
- --with-metalink \
- --with-openssl \
- --with-gpgme-prefix=$INSTALL_PATH
-(($? != 0)) && { printf '%s\n' "[wget openssl] configure failed"; exit 1; }
+CFLAGS="-I$INSTALL_PATH/include -DGNUTLS_INTERNAL_BUILD=1 -DCARES_STATICLIB=1 -DPCRE2_STATIC=1 -DNDEBUG -O3 -march=x86-64 -mtune=generic" \
+LDFLAGS="-L$INSTALL_PATH/lib -static -static-libgcc" \
+GNUTLS_CFLAGS=$CFLAGS \
+GNUTLS_LIBS="-L$INSTALL_PATH/lib -lgnutls" \
+LIBPSL_CFLAGS=$CFLAGS \
+LIBPSL_LIBS="-L$INSTALL_PATH/lib -lpsl" \
+CARES_CFLAGS=$CFLAGS \
+CARES_LIBS="-L$INSTALL_PATH/lib -lcares" \
+PCRE2_CFLAGS=$CFLAGS \
+PCRE2_LIBS="-L$INSTALL_PATH/lib -lpcre2-8"  \
+METALINK_CFLAGS="-I$INSTALL_PATH/include" \
+METALINK_LIBS="-L$INSTALL_PATH/lib -lmetalink -lexpat" \
+LIBS="-L$INSTALL_PATH/lib -lhogweed -lnettle -lgmp -ltasn1 -lidn2 -lpsl -lcares -lunistring -liconv -lpcre2-8 -lmetalink -lexpat -lgpgme -lassuan -lgpg-error -lz -lcrypt32" \
+./configure \
+--host=x86_64-w64-mingw32 \
+--prefix=$INSTALL_PATH \
+--disable-debug \
+--disable-valgrind-tests \
+--enable-iri \
+--enable-pcre2 \
+--with-ssl=gnutls \
+--with-included-libunistring \
+--with-libidn \
+--with-cares \
+--with-libpsl \
+--with-metalink \
+--with-gpgme-prefix=$INSTALL_PATH
+(($? != 0)) && { printf '%s\n' "[wget gnutls] configure failed"; exit 1; }
 make
-(($? != 0)) && { printf '%s\n' "[wget openssl] make failed"; exit 1; }
+(($? != 0)) && { printf '%s\n' "[wget gnutls] make failed"; exit 1; }
 make install
-(($? != 0)) && { printf '%s\n' "[wget openssl] make install"; exit 1; }
-mkdir $INSTALL_PATH/wget-openssl
-cp $INSTALL_PATH/bin/wget.exe $INSTALL_PATH/wget-openssl
-x86_64-w64-mingw32-strip $INSTALL_PATH/wget-openssl/wget.exe
+(($? != 0)) && { printf '%s\n' "[wget gnutls] make install"; exit 1; }
+mkdir $INSTALL_PATH/wget-gnutls
+cp $INSTALL_PATH/bin/wget.exe $INSTALL_PATH/wget-gnutls
+x86_64-w64-mingw32-strip $INSTALL_PATH/wget-gnutls/wget.exe
