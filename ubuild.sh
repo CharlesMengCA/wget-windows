@@ -38,10 +38,10 @@ iconV="1.16"
 pslV="0.21.1"
 
 # https://github.com/PhilipHazel/pcre2/releases
-pcre2V="10.39"
+pcre2V="10.40"
 
 # https://www.gnupg.org/ftp/gcrypt/libgpg-error/
-gpgErrorV="1.44"
+gpgErrorV="1.45"
 
 # https://www.gnupg.org/ftp/gcrypt/libassuan/
 assuanV="2.5.5"
@@ -50,20 +50,21 @@ assuanV="2.5.5"
 gpgmeV="1.17.1"
 
 # https://github.com/libexpat/libexpat/releases
-expatV="2.4.7"
+expatV="2.4.8"
 
 # https://github.com/metalink-dev/libmetalink/releases
 metalinkV="0.1.3"
 
 # https://zlib.net/
-zlibV="1.2.11"
+zlibV="1.2.12"
 
 # https://www.openssl.org/source/
-opensslV="1.1.1n"
+opensslV="1.1.1o"
 
 PATCH_PATH=$PWD
 
-sudo apt-get install -y mingw-w64 python make m4 pkg-config automake gettext wget
+sudo apt-get install -y mingw-w64 make m4 pkg-config automake gettext wget
+#python
 
 cd ~
 mkdir wget
@@ -79,7 +80,7 @@ export INSTALL_PATH=$PWD/build
 # build gmp
 # -----------------------------------------------------------------------------
 if [ ! -f $INSTALL_PATH/lib/libgmp.a ]; then
-	wget https://gmplib.org/download/gmp/gmp-${gmpV}.tar.xz
+	wget -nc https://gmplib.org/download/gmp/gmp-${gmpV}.tar.xz
 	tar -xf gmp-${gmpV}.tar.xz 
 	cd gmp-${gmpV}
 	./configure \
@@ -97,7 +98,7 @@ fi
 # build nettle
 # -----------------------------------------------------------------------------
 if [ ! -f $INSTALL_PATH/lib/libnettle.a ]; then
-	wget https://ftp.gnu.org/gnu/nettle/nettle-${nettleV}.tar.gz
+	wget -nc https://ftp.gnu.org/gnu/nettle/nettle-${nettleV}.tar.gz
 	tar -xf nettle-${nettleV}.tar.gz
 	cd nettle-${nettleV}
 	CFLAGS="-I$INSTALL_PATH/include" \
@@ -118,11 +119,12 @@ fi
 # build tasn
 # -----------------------------------------------------------------------------
 if [ ! -f $INSTALL_PATH/lib/libtasn1.a ]; then
-	wget https://ftp.gnu.org/gnu/libtasn1/libtasn1-${libtasn1V}.tar.gz
+	wget -nc https://ftp.gnu.org/gnu/libtasn1/libtasn1-${libtasn1V}.tar.gz
 	tar -xf libtasn1-${libtasn1V}.tar.gz
 	cd libtasn1-${libtasn1V}
 	./configure \
 	--host=x86_64-w64-mingw32 \
+	CXXFLAGS='-flto' \
 	--disable-shared \
 	--disable-doc \
 	--prefix=$INSTALL_PATH
@@ -137,7 +139,7 @@ fi
 # build idn2
 # -----------------------------------------------------------------------------
 if [ ! -f $INSTALL_PATH/lib/libidn2.a ]; then
-	wget https://ftp.gnu.org/gnu/libidn/libidn2-${libidn2V}.tar.gz
+	wget -nc https://ftp.gnu.org/gnu/libidn/libidn2-${libidn2V}.tar.gz
 	tar -xf libidn2-${libidn2V}.tar.gz
 	cd libidn2-${libidn2V}
 	./configure \
@@ -156,7 +158,7 @@ fi
 # build unistring
 # -----------------------------------------------------------------------------
 if [ ! -f $INSTALL_PATH/lib/libunistring.a ]; then
-	wget https://ftp.gnu.org/gnu/libunistring/libunistring-${libunistringV}.tar.gz
+	wget -nc https://ftp.gnu.org/gnu/libunistring/libunistring-${libunistringV}.tar.gz
 	tar -xf libunistring-${libunistringV}.tar.gz
 	cd libunistring-${libunistringV}
 	./configure \
@@ -174,7 +176,7 @@ fi
 # build cares
 # -----------------------------------------------------------------------------
 if [ ! -f $INSTALL_PATH/lib/libcares.a ]; then
-	wget https://c-ares.haxx.se/download/c-ares-${caresV}.tar.gz
+	wget -nc https://c-ares.haxx.se/download/c-ares-${caresV}.tar.gz
 	tar -xf c-ares-${caresV}.tar.gz
 	cd c-ares-${caresV}
 	CPPFLAGS="-DCARES_STATICLIB=1" \
@@ -196,7 +198,7 @@ fi
 # build iconv
 # -----------------------------------------------------------------------------
 if [ ! -f $INSTALL_PATH/lib/libiconv.a ]; then
-	wget https://ftp.gnu.org/gnu/libiconv/libiconv-${iconV}.tar.gz
+	wget -nc https://ftp.gnu.org/gnu/libiconv/libiconv-${iconV}.tar.gz
 	tar -xf libiconv-${iconV}.tar.gz
 	cd libiconv-${iconV}
 	./configure \
@@ -215,7 +217,7 @@ fi
 # build psl
 # -----------------------------------------------------------------------------
 if [ ! -f $INSTALL_PATH/lib/libpsl.a ]; then
-	wget https://github.com/rockdaboot/libpsl/releases/download/${pslV}/libpsl-${pslV}.tar.gz
+	wget -nc https://github.com/rockdaboot/libpsl/releases/download/${pslV}/libpsl-${pslV}.tar.gz
 	tar -xf libpsl-${pslV}.tar.gz
 	cd libpsl-${pslV}
 	CFLAGS="-I$INSTALL_PATH/include" \
@@ -242,8 +244,8 @@ fi
 # build pcre2
 # -----------------------------------------------------------------------------
 if [ ! -f $INSTALL_PATH/lib/libpcre2-8.a ]; then
-	wget https://github.com/PhilipHazel/pcre2/releases/download/pcre2-${pcre2V}/pcre2-${pcre2V}.tar.gz
-	#wget https://ftp.pcre.org/pub/pcre/pcre2-${pcre2V}.tar.gz
+	wget -nc https://github.com/PhilipHazel/pcre2/releases/download/pcre2-${pcre2V}/pcre2-${pcre2V}.tar.gz
+	#wget -nc https://ftp.pcre.org/pub/pcre/pcre2-${pcre2V}.tar.gz
 	tar -xf pcre2-${pcre2V}.tar.gz
 	cd pcre2-${pcre2V}
 	./configure \
@@ -262,7 +264,7 @@ fi
 # build gpg-error
 # -----------------------------------------------------------------------------
 if [ ! -f $INSTALL_PATH/lib/libgpg-error.a ]; then
-	wget https://www.gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-${gpgErrorV}.tar.gz
+	wget -nc https://www.gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-${gpgErrorV}.tar.gz
 	tar -xf libgpg-error-${gpgErrorV}.tar.gz
 	cd libgpg-error-${gpgErrorV}
 	./configure \
@@ -282,7 +284,7 @@ fi
 # build assuan
 # -----------------------------------------------------------------------------
 if [ ! -f $INSTALL_PATH/lib/libassuan.a ]; then
-	wget https://gnupg.org/ftp/gcrypt/libassuan/libassuan-${assuanV}.tar.bz2
+	wget -nc https://gnupg.org/ftp/gcrypt/libassuan/libassuan-${assuanV}.tar.bz2
 	tar -xf libassuan-${assuanV}.tar.bz2
 	cd libassuan-${assuanV}
 	./configure \
@@ -303,7 +305,7 @@ fi
 # build gpgme
 # -----------------------------------------------------------------------------
 if [ ! -f $INSTALL_PATH/lib/libgpgme.a ]; then
-	wget https://gnupg.org/ftp/gcrypt/gpgme/gpgme-${gpgmeV}.tar.bz2
+	wget -nc https://gnupg.org/ftp/gcrypt/gpgme/gpgme-${gpgmeV}.tar.bz2
 	tar -xf gpgme-${gpgmeV}.tar.bz2 
 	cd gpgme-${gpgmeV}
 	./configure \
@@ -329,7 +331,7 @@ fi
 # build expat
 # -----------------------------------------------------------------------------
 if [ ! -f $INSTALL_PATH/lib/libexpat.a ]; then
-	wget https://github.com/libexpat/libexpat/releases/download/R_${expatV//\./_}/expat-${expatV}.tar.gz
+	wget -nc https://github.com/libexpat/libexpat/releases/download/R_${expatV//\./_}/expat-${expatV}.tar.gz
 	tar -xf expat-${expatV}.tar.gz
 	cd expat-${expatV}
 	./configure \
@@ -351,7 +353,7 @@ fi
 # build metalink
 # -----------------------------------------------------------------------------
 if [ ! -f $INSTALL_PATH/lib/libmetalink.a ]; then
-	wget https://github.com/metalink-dev/libmetalink/releases/download/release-${metalinkV}/libmetalink-${metalinkV}.tar.gz
+	wget -nc https://github.com/metalink-dev/libmetalink/releases/download/release-${metalinkV}/libmetalink-${metalinkV}.tar.gz
 	tar -xf libmetalink-${metalinkV}.tar.gz
 	cd libmetalink-${metalinkV}
 	EXPAT_CFLAGS="-I$INSTALL_PATH/include" \
@@ -374,7 +376,7 @@ fi
 # build zlib
 # -----------------------------------------------------------------------------
 if [ ! -f $INSTALL_PATH/lib/libz.a ]; then
-	wget https://zlib.net/zlib-${zlibV}.tar.gz
+	wget -nc https://zlib.net/zlib-${zlibV}.tar.gz
 	tar -xf zlib-${zlibV}.tar.gz
 	cd zlib-${zlibV}
 	CC=x86_64-w64-mingw32-gcc ./configure --64 --static --prefix=$INSTALL_PATH
@@ -389,7 +391,7 @@ fi
 # build openssl
 # -----------------------------------------------------------------------------
 if [ ! -f $INSTALL_PATH/lib/libssl.a ]; then
-	wget https://www.openssl.org/source/openssl-${opensslV}.tar.gz
+	wget -nc https://www.openssl.org/source/openssl-${opensslV}.tar.gz
 	tar -xf openssl-${opensslV}.tar.gz
 	cd openssl-${opensslV}
 	./Configure \
@@ -409,7 +411,7 @@ if [ ! -f $INSTALL_PATH/lib/libssl.a ]; then
 fi
 cp /usr/x86_64-w64-mingw32/lib/libbcrypt.a $INSTALL_PATH/lib/
 
-wget https://ftp.gnu.org/gnu/wget/wget-${wgetV}.tar.gz
+wget -nc https://ftp.gnu.org/gnu/wget/wget-${wgetV}.tar.gz
 tar -xf wget-${wgetV}.tar.gz
 cd wget-${wgetV}
 
