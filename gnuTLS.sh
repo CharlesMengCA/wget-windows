@@ -2,11 +2,9 @@
 clear
 echo $0 $@
 
-#
 # wget build script for Windows environment
 # Author: WebFolder
 # https://webfolder.io
-# March 15, 2021
 
 # https://ftp.gnu.org/gnu/wget/?C=M;O=D
 wgetV="1.21.3"
@@ -28,7 +26,7 @@ libidn2V="2.3.0"
 libunistringV="1.0"
 
 # https://www.gnupg.org/ftp/gcrypt/gnutls/v3.7/
-gnutlsV="3.7.2"
+gnutlsV="3.7.5"
 gnutlsV1="3.7"
 
 # https://c-ares.org/download/
@@ -36,38 +34,36 @@ caresV="1.17.2"
 # 1.18.1 couldn't compile
 
 # https://ftp.gnu.org/gnu/libiconv/?C=M;O=D
-iconV="1.16"
+iconV="1.17"
 
 # https://github.com/rockdaboot/libpsl/releases
 pslV="0.21.1"
 
 # https://ftp.pcre.org/pub/pcre
-pcre2V="10.39"
+pcre2V="10.40"
 
 # https://www.gnupg.org/ftp/gcrypt/libgpg-error/
-gpgErrorV="1.44"
+gpgErrorV="1.45"
 
 # https://www.gnupg.org/ftp/gcrypt/libassuan/
 assuanV="2.5.5"
 
 # https://gnupg.org/ftp/gcrypt/gpgme/
-gpgmeV="1.17.0"
+gpgmeV="1.17.1"
 
 # https://github.com/libexpat/libexpat/releases
-expatV="2.4.6"
+expatV="2.4.8"
 
 # https://github.com/metalink-dev/libmetalink/releases
 metalinkV="0.1.3"
 
 # https://zlib.net/
-zlibV="1.2.11"
-
-# https://www.openssl.org/source/
-opensslV="1.1.1m"
+zlibV="1.2.12"
 
 PATCH_PATH=$PWD
 
-sudo apt-get install -y mingw-w64 python make m4 pkg-config automake gettext wget
+sudo apt-get install -y mingw-w64 m4 pkg-config automake gettext
+#python make wget
 
 cd ~
 mkdir wget
@@ -452,7 +448,7 @@ PCRE2_CFLAGS=$CFLAGS \
 PCRE2_LIBS="-L$INSTALL_PATH/lib -lpcre2-8"  \
 METALINK_CFLAGS="-I$INSTALL_PATH/include" \
 METALINK_LIBS="-L$INSTALL_PATH/lib -lmetalink -lexpat" \
-LIBS="-L$INSTALL_PATH/lib -lhogweed -lnettle -lgmp -ltasn1 -lidn2 -lpsl -lcares -lunistring -liconv -lpcre2-8 -lmetalink -lexpat -lgpgme -lassuan -lgpg-error -lz -lcrypt32" \
+LIBS="-L$INSTALL_PATH/lib -lhogweed -lnettle -lgmp -ltasn1 -lidn2 -lpsl -lcares -lunistring -liconv -lpcre2-8 -lmetalink -lexpat -lgpgme -lassuan -lgpg-error -lz -lcrypt32 -lpthread" \
 ./configure \
 --host=x86_64-w64-mingw32 \
 --prefix=$INSTALL_PATH \
