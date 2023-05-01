@@ -1,6 +1,5 @@
 #!/bin/bash
-clear
-echo $0 $@
+clear && echo $0 $@
 
 # wget build script for Windows environment
 # Author: WebFolder
@@ -13,34 +12,36 @@ wgetV="1.21.3"
 gmpV="6.2.1"
 
 # https://ftp.gnu.org/gnu/nettle/?C=M;O=D
-nettleV="3.7.3"
+nettleV="3.8.1"
 
 # https://ftp.gnu.org/gnu/libtasn1/?C=M;O=D
-libtasn1V="4.18.0"
+libtasn1V="4.19.0"
 
 # https://ftp.gnu.org/gnu/libidn/?C=M;O=D
 libidn2V="2.3.0"
-# 2.3.1, 2.3.2 couldn't compile
+# 2.3.1, 2.3.2, 2.3.3 couldn't compile
 
 # https://ftp.gnu.org/gnu/libunistring/?C=M;O=D
-libunistringV="1.0"
+libunistringV="1.1"
 
 # https://www.gnupg.org/ftp/gcrypt/gnutls/v3.7/
-gnutlsV="3.7.5"
-gnutlsV1="3.7"
+gnutlsV="3.8.0"
+gnutlsV1="3.8"
 
 # https://c-ares.org/download/
 caresV="1.17.2"
-# 1.18.1 couldn't compile
+# 1.18.0, 1.18.1, 1.19.0 couldn't compile
 
 # https://ftp.gnu.org/gnu/libiconv/?C=M;O=D
 iconV="1.17"
 
 # https://github.com/rockdaboot/libpsl/releases
 pslV="0.21.1"
+#0.21.2 undefined reference to `localtime_r
 
 # https://ftp.pcre.org/pub/pcre
-pcre2V="10.40"
+pcre2V="10.41"
+#10.42 undefined reference to __imp_pcre2_regerror
 
 # https://www.gnupg.org/ftp/gcrypt/libgpg-error/
 gpgErrorV="1.45"
@@ -50,15 +51,16 @@ assuanV="2.5.5"
 
 # https://gnupg.org/ftp/gcrypt/gpgme/
 gpgmeV="1.17.1"
+# 1.18.0 found problem in testing.
 
 # https://github.com/libexpat/libexpat/releases
-expatV="2.4.8"
+expatV="2.5.0"
 
 # https://github.com/metalink-dev/libmetalink/releases
 metalinkV="0.1.3"
 
 # https://zlib.net/
-zlibV="1.2.12"
+zlibV="1.2.13"
 
 PATCH_PATH=$PWD
 
@@ -436,8 +438,8 @@ pwd
 # build wget (gnuTLS)
 # -----------------------------------------------------------------------------
 
-CFLAGS="-I$INSTALL_PATH/include -DGNUTLS_INTERNAL_BUILD=1 -DCARES_STATICLIB=1 -DPCRE2_STATIC=1 -DNDEBUG -O3 -march=x86-64 -mtune=generic" \
-LDFLAGS="-L$INSTALL_PATH/lib -static -static-libgcc" \
+CFLAGS="-I$INSTALL_PATH/include -DGNUTLS_INTERNAL_BUILD=1 -DCARES_STATICLIB=1 -DPCRE2_STATIC=1 -DNDEBUG -O3 -march=x86-64 -mtune=generic -flto" \
+LDFLAGS="-L$INSTALL_PATH/lib -static -static-libgcc -flto -s" \
 GNUTLS_CFLAGS=$CFLAGS \
 GNUTLS_LIBS="-L$INSTALL_PATH/lib -lgnutls" \
 LIBPSL_CFLAGS=$CFLAGS \
@@ -448,7 +450,7 @@ PCRE2_CFLAGS=$CFLAGS \
 PCRE2_LIBS="-L$INSTALL_PATH/lib -lpcre2-8"  \
 METALINK_CFLAGS="-I$INSTALL_PATH/include" \
 METALINK_LIBS="-L$INSTALL_PATH/lib -lmetalink -lexpat" \
-LIBS="-L$INSTALL_PATH/lib -lhogweed -lnettle -lgmp -ltasn1 -lidn2 -lpsl -lcares -lunistring -liconv -lpcre2-8 -lmetalink -lexpat -lgpgme -lassuan -lgpg-error -lz -lcrypt32 -lpthread" \
+LIBS="-L$INSTALL_PATH/lib -lhogweed -lnettle -lgmp -ltasn1 -lidn2 -lpsl -lcares -lunistring -liconv -lpcre2-8 -lmetalink -lexpat -lgpgme -lassuan -lgpg-error -lz -lcrypt32 -pthread" \
 ./configure \
 --host=x86_64-w64-mingw32 \
 --prefix=$INSTALL_PATH \
